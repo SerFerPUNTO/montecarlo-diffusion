@@ -14,26 +14,35 @@ class AnimatedGrid:
         )
 
         self.cbar = self.fig.colorbar(self.im, ax=self.ax)
-        self.ax.set_yticks([])   # inutili in 1D
-        self.ax.set_xticks([])   # COSTOSISSIMI se grid è grande
+        self.ax.set_yticks([])
+        self.ax.set_xticks([])
+
+        # scatter opzionale per particelle
+        self.scatter = self.ax.scatter([], [], c='red')
 
         plt.ion()
         plt.show(block=False)
 
-    def update(self, grid, n_it=None):
-        self.im.set_data(grid)
+    def update(self, grid=None, particles=None, n_it=None):
+        if grid is not None:
+            self.im.set_data(grid)
+            vmin, vmax = grid.min(), grid.max()
+            if vmin == vmax:
+                vmax = vmin + 1
+            self.im.set_clim(vmin, vmax)
 
-        # aggiorna colorbar SOLO se necessario
-        self.im.set_clim(grid.min(), grid.max())
+        if particles is not None:
+            self.scatter.set_offsets(particles.T)
 
         if n_it is not None:
             self.ax.set_title(f"Iteration {n_it}")
+        else:
+            self.ax.set_title("")
 
         self.fig.canvas.draw_idle()
         self.fig.canvas.flush_events()
         plt.pause(self.pause)
 
     def wait(self):
-            import matplotlib.pyplot as plt
-            plt.ioff()
-            plt.show(block=True)
+        plt.ioff()
+        plt.show(block=True)
